@@ -2710,7 +2710,7 @@ Gdip_ResetClip(pGraphics)
 Gdip_GetClipRegion(pGraphics)
 {
 	Region := Gdip_CreateRegion()
-	DllCall("gdiplus\GdipGetClip", "UPtr", pGraphics, "UInt", Region)
+	DllCall("gdiplus\GdipGetClip", "UPtr", pGraphics, "UPtr", Region)
 	return Region
 }
 
@@ -2721,7 +2721,7 @@ Gdip_SetClipRegion(pGraphics, Region, CombineMode:=0)
 
 Gdip_CreateRegion()
 {
-	DllCall("gdiplus\GdipCreateRegion", "UInt*", &Region:=0)
+	DllCall("gdiplus\GdipCreateRegion", "UPtr*", &Region:=0)
 	return Region
 }
 
@@ -2926,20 +2926,20 @@ StrGetB(Address, Length:=-1, Encoding:=0)
 	if !Encoding { 	; "" or 0
 		; No conversion necessary, but we might not want the whole string.
 		if (Length == -1)
-			Length := DllCall("lstrlen", "UInt", Address)
+			Length := DllCall("lstrlen", "Ptr", Address)
 		VarSetStrCapacity(&myString, Length)
-		DllCall("lstrcpyn", "str", myString, "UInt", Address, "Int", Length + 1)
+		DllCall("lstrcpyn", "str", myString, "Ptr", Address, "Int", Length + 1)
 
 	} else if (Encoding = 1200) { 	; UTF-16
-		char_count := DllCall("WideCharToMultiByte", "UInt", 0, "UInt", 0x400, "UInt", Address, "Int", Length, "UInt", 0, "UInt", 0, "UInt", 0, "UInt", 0)
+		char_count := DllCall("WideCharToMultiByte", "UInt", 0, "UInt", 0x400, "Ptr", Address, "Int", Length, "UInt", 0, "UInt", 0, "UInt", 0, "UInt", 0)
 		VarSetStrCapacity(&myString, char_count)
-		DllCall("WideCharToMultiByte", "UInt", 0, "UInt", 0x400, "UInt", Address, "Int", Length, "str", myString, "Int", char_count, "UInt", 0, "UInt", 0)
+		DllCall("WideCharToMultiByte", "UInt", 0, "UInt", 0x400, "Ptr", Address, "Int", Length, "str", myString, "Int", char_count, "UInt", 0, "UInt", 0)
 
 	} else if IsInteger(Encoding) {
 		; Convert from target encoding to UTF-16 then to the active code page.
-		char_count := DllCall("MultiByteToWideChar", "UInt", Encoding, "UInt", 0, "UInt", Address, "Int", Length, "UInt", 0, "Int", 0)
+		char_count := DllCall("MultiByteToWideChar", "UInt", Encoding, "UInt", 0, "Ptr", Address, "Int", Length, "Ptr", 0, "Int", 0)
 		VarSetStrCapacity(&myString, char_count * 2)
-		char_count := DllCall("MultiByteToWideChar", "UInt", Encoding, "UInt", 0, "UInt", Address, "Int", Length, "UInt", myString.Ptr, "Int", char_count * 2)
+		char_count := DllCall("MultiByteToWideChar", "UInt", Encoding, "UInt", 0, "Ptr", Address, "Int", Length, "Ptr", myString.Ptr, "Int", char_count * 2)
 		myString := StrGetB(myString.Ptr, char_count, 1200)
 	}
 
